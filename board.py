@@ -11,7 +11,7 @@ white_pieces = 2
 black_pieces = 2
 
 root = Tk()
-game_screen = Canvas(root, width=1000, height=1000, background="#405336", highlightthickness=0)
+game_screen = Canvas(root, width=500, height=500, background="#405336", highlightthickness=0)
 game_screen.pack()
 
 
@@ -58,14 +58,25 @@ class Board:
         game_screen.create_line(50, 50 * 9, 50 * 9, 50 * 9)
         game_screen.create_line(50 * 9, 50, 50 * 9, 50 * 9)
 
+# CHANGE BETWEEN PREVIOUS ARRAY AND BOARD ARRAY FOR UNDO FUNCTIONALITY?
     def board_move(self, x, y):
-        self.previous_array = self.board_array
-        self.previous_array[x][y] = "W"
         self.board_array = move(self.board_array, x, y)
+        print(self.board_array[x][y])
+        self.previous_array = self.board_array
+        self.display_board()
+
+def update():
+    myBoard = Board()
+    myBoard.display_board()
 
 def move(given_array, x, y):
+    global move_number
     new_array = deepcopy(given_array)
-    new_array[x][y] = "W"
+    if move_number % 2 == 0:
+        new_array[x][y] = "W"
+    else:
+        new_array[x][y] = "B"
+    move_number += 1
     return new_array
 
 def click(event):
@@ -74,6 +85,7 @@ def click(event):
 
     x = int((event.x - 50) / 50)
     y = int((event.y - 50) / 50)
+    myBoard.board_move(x, y)
     print(x, y)
 
 
@@ -82,6 +94,7 @@ myBoard = Board()
 myBoard.display_board()
 game_screen.bind("<Button-1>", click)
 # game_screen.bind("<Key>", key)
+game_screen.update()
 
 
 root.mainloop()
