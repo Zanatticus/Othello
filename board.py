@@ -73,7 +73,7 @@ def update():
     myBoard = Board()
     myBoard.display_board()
 
-
+# TODO REMOVE COMMENTS: MAYBE REIMPLEMENT THE ADDING NEIGHBORS LIST TO ONLY ADD OPPOSITE COLORS???
 def is_valid_move(given_array, x, y):
     print("test1")
     global move_number
@@ -124,12 +124,9 @@ def is_valid_move(given_array, x, y):
                             print("FORM LINE IS TRUE WOW")
                             forms_line = True
                             break
-                        else:
-                            print("TEST ELSE")
-                            holdY = holdY + y_difference
-                            holdX = holdX + x_difference # CANT BREAK> NEED TO FIX IT.
-                        #holdX += x_difference
-                        #holdX += y_difference
+                        holdX = holdX + x_difference
+                        holdY = holdY + y_difference
+
             print("FORMS_LINE =", forms_line)
             return forms_line
 
@@ -144,16 +141,47 @@ def get_valid_moves(given_array, x, y):
                 game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 66 + 50 * x, 66 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="green", outline="#aaa")
     return validMoves
 
-
+#TODO FLIPPING MECHANIC
 def move(given_array, x, y):
     global move_number
     #new_array = deepcopy(given_array) TODO DEEPCOPY OR NO?
     new_array = given_array
     if move_number % 2 == 0:
-        new_array[x][y] = "W"
+        player_color = "W"
     else:
-        new_array[x][y] = "B"
+        player_color = "B"
+    new_array[x][y] = player_color
     move_number += 1
+
+    opposite_neighbors = []
+    for i in range(max(0, x - 1), min(x + 2, 8)):
+        for j in range(max(0, y - 1), min(y + 2, 8)):
+            if given_array[i][j] is not None and given_array[i][j] != player_color:
+                opposite_neighbors.append([i, j])
+
+    for neighbor in opposite_neighbors:
+        xVal = neighbor[0]
+        yVal = neighbor[1]
+        x_difference = xVal - x
+        y_difference = yVal - y
+        holdX = xVal
+        holdY = yVal
+
+        line_elements = []
+
+        while 0 <= holdX <= 7 and 0 <= holdY <= 7:
+            line_color = given_array[holdX][holdY]
+            line_elements.append([holdX, holdY])
+            if line_color is None:
+                break
+            if line_color == player_color:
+                for piece in line_elements:
+                    new_array[piece[0]][piece[1]] = player_color
+                break
+            # Continue down the line
+            holdX = holdX + x_difference
+            holdY = holdY + y_difference
+
     return new_array
 
 
@@ -161,11 +189,12 @@ def move(given_array, x, y):
 def click(event):
     x = int((event.x - 50) / 50)
     y = int((event.y - 50) / 50)
-    if is_valid_move(myBoard.board_array, x, y):
-        myBoard.board_move(x, y)
-        print(x, y)
-    else:
-        print("INVALID MOVE")
+    if 0 <= x <= 7 and 0 <= y <= 7:
+        if is_valid_move(myBoard.board_array, x, y):
+            myBoard.board_move(x, y)
+            print(x, y)
+        else:
+            print("INVALID MOVE")
 
 
 
