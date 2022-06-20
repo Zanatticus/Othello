@@ -81,9 +81,11 @@ def is_valid_move(given_array, x, y):
         player_color = "W"
     else:
         player_color = "B"
+    # Checks for spots already taken
     if given_array[x][y] is not None:
         print("INVALID: ALREADY HAVE PIECE")
         return False
+    # Validity check for Othello rules: Flanking/neighbors
     else:
         has_neighbors = False
         neighbors = []
@@ -92,6 +94,8 @@ def is_valid_move(given_array, x, y):
                 if given_array[i][j] is not None:
                     has_neighbors = True
                     neighbors.append([i, j])
+                    print("HAS A NEIGHBOR")
+        print(neighbors)
         if not has_neighbors:
             print("INVALID: NO NEIGHBORS")
             return False
@@ -108,17 +112,24 @@ def is_valid_move(given_array, x, y):
                     holdX = xVal
                     holdY = yVal
                     print("test2")
-
-                    while 0 <= holdX <= 7 and 0 <= holdY <= 7:
+                    print("XDIFF =", x_difference)
+                    print("YDIFF =", y_difference)
+                    print("HOLDX =", holdX)
+                    print("HOLDY =", holdY)
+                    while (0 <= holdX <= 7) and (0 <= holdY <= 7):
                         if given_array[holdX][holdY] is None:
-                            print("BREAK ON while")
+                            print("BREAK ON EMPTY")
                             break
                         if given_array[holdX][holdY] == player_color:
                             print("FORM LINE IS TRUE WOW")
                             forms_line = True
                             break
-                        holdX += x_difference
-                        holdX += y_difference
+                        else:
+                            print("TEST ELSE")
+                            holdY = holdY + y_difference
+                            holdX = holdX + x_difference # CANT BREAK> NEED TO FIX IT.
+                        #holdX += x_difference
+                        #holdX += y_difference
             print("FORMS_LINE =", forms_line)
             return forms_line
 
@@ -136,8 +147,8 @@ def get_valid_moves(given_array, x, y):
 
 def move(given_array, x, y):
     global move_number
-    new_array = deepcopy(given_array)
-
+    #new_array = deepcopy(given_array) TODO DEEPCOPY OR NO?
+    new_array = given_array
     if move_number % 2 == 0:
         new_array[x][y] = "W"
     else:
@@ -153,6 +164,8 @@ def click(event):
     if is_valid_move(myBoard.board_array, x, y):
         myBoard.board_move(x, y)
         print(x, y)
+    else:
+        print("INVALID MOVE")
 
 
 
