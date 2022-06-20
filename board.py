@@ -62,7 +62,7 @@ class Board:
 # CHANGE BETWEEN PREVIOUS ARRAY AND BOARD ARRAY FOR UNDO FUNCTIONALITY?
     def board_move(self, x, y):
         self.board_array = move(self.board_array, x, y)
-        print(self.board_array[x][y])
+        print(self.board_array[x][y], "MOVE #:", move_number)
         self.previous_array = self.board_array
         self.display_board()
 
@@ -107,11 +107,14 @@ def is_valid_move(given_array, x, y):
                     y_difference = yVal - y
                     holdX = xVal
                     holdY = yVal
+                    print("test2")
 
                     while 0 <= holdX <= 7 and 0 <= holdY <= 7:
                         if given_array[holdX][holdY] is None:
+                            print("BREAK ON while")
                             break
                         if given_array[holdX][holdY] == player_color:
+                            print("FORM LINE IS TRUE WOW")
                             forms_line = True
                             break
                         holdX += x_difference
@@ -120,7 +123,7 @@ def is_valid_move(given_array, x, y):
             return forms_line
 
 
-# Function to be used to display available moves
+# Function to be used to display available moves TODO IMPLEMENT
 def get_valid_moves(given_array, x, y):
     validMoves = []
     for i in range(8):
