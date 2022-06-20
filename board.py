@@ -58,6 +58,7 @@ class Board:
         game_screen.create_line(50, 50 * 9, 50 * 9, 50 * 9)
         game_screen.create_line(50 * 9, 50, 50 * 9, 50 * 9)
 
+
 # CHANGE BETWEEN PREVIOUS ARRAY AND BOARD ARRAY FOR UNDO FUNCTIONALITY?
     def board_move(self, x, y):
         self.board_array = move(self.board_array, x, y)
@@ -65,13 +66,75 @@ class Board:
         self.previous_array = self.board_array
         self.display_board()
 
+    #def neighbor_flip(self, x, y):
+
+
 def update():
     myBoard = Board()
     myBoard.display_board()
 
+
+def is_valid_move(given_array, x, y):
+    print("test1")
+    global move_number
+    if move_number % 2 == 0:
+        player_color = "W"
+    else:
+        player_color = "B"
+    if given_array[x][y] is not None:
+        print("INVALID: ALREADY HAVE PIECE")
+        return False
+    else:
+        has_neighbors = False
+        neighbors = []
+        for i in range(max(0, x - 1), min(x + 2, 8)):
+            for j in range(max(0, y - 1), min(y + 2, 8)):
+                if given_array[i][j] is not None:
+                    has_neighbors = True
+                    neighbors.append([i, j])
+        if not has_neighbors:
+            print("INVALID: NO NEIGHBORS")
+            return False
+        else:
+            forms_line = False
+            for neighbor in neighbors:
+                xVal = neighbor[0]
+                yVal = neighbor[1]
+                if given_array[xVal][yVal] == player_color:
+                    continue
+                else:
+                    x_difference = xVal - x
+                    y_difference = yVal - y
+                    holdX = xVal
+                    holdY = yVal
+
+                    while 0 <= holdX <= 7 and 0 <= holdY <= 7:
+                        if given_array[holdX][holdY] is None:
+                            break
+                        if given_array[holdX][holdY] == player_color:
+                            forms_line = True
+                            break
+                        holdX += x_difference
+                        holdX += y_difference
+            print("FORMS_LINE =", forms_line)
+            return forms_line
+
+
+# Function to be used to display available moves
+def get_valid_moves(given_array, x, y):
+    validMoves = []
+    for i in range(8):
+        for j in range(8):
+            if is_valid_move(given_array, x, y):
+                validMoves.append([x, y])
+                game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 66 + 50 * x, 66 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="green", outline="#aaa")
+    return validMoves
+
+
 def move(given_array, x, y):
     global move_number
     new_array = deepcopy(given_array)
+
     if move_number % 2 == 0:
         new_array[x][y] = "W"
     else:
@@ -79,14 +142,14 @@ def move(given_array, x, y):
     move_number += 1
     return new_array
 
-def click(event):
-    xClick = event.x
-    yCick = event.y
 
+# TODO implement validity checking
+def click(event):
     x = int((event.x - 50) / 50)
     y = int((event.y - 50) / 50)
-    myBoard.board_move(x, y)
-    print(x, y)
+    if is_valid_move(myBoard.board_array, x, y):
+        myBoard.board_move(x, y)
+        print(x, y)
 
 
 
