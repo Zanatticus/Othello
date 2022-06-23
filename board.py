@@ -1,14 +1,14 @@
 from tkinter import *
-from tkinter.ttk import *
-from math import *
-from time import *
-from random import *
 from copy import deepcopy
 
 # Global variables
 move_number = 0
 white_pieces = 2
 black_pieces = 2
+white_wins = 0
+black_wins = 0
+num_draws = 0
+undo_counter = 0
 
 root = Tk()
 game_screen = Canvas(root, width=500, height=500, background="#405336", highlightthickness=0)
@@ -19,8 +19,8 @@ class Board:
 
     def __init__(self):
         """
-         Initializes an 8x8 Othello board
-         """
+        Initializes an 8x8 Othello board
+        """
         self.row = 0
         self.column = 0
         self.board_array = []
@@ -37,45 +37,73 @@ class Board:
 
         self.previous_array = self.board_array
 
-
     def display_board(self):
+        game_screen.delete("all")
         for x in range(8):
             for y in range(8):
                 self.row = x
                 self.column = y
-                if self.previous_array[x][y] == "W":
-                    game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 96 + 50 * x, 96 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="#aaa", outline="#aaa")
-                    game_screen.create_oval(54 + 50 * x, 52 + 50 * y, 96 + 50 * x, 94 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="#fff", outline="#fff")
+                if self.board_array[x][y] == "W":
+                    game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 96 + 50 * x, 96 + 50 * y, fill="#aaa",
+                                            outline="#aaa")
+                    game_screen.create_oval(54 + 50 * x, 52 + 50 * y, 96 + 50 * x, 94 + 50 * y, fill="#fff",
+                                            outline="#fff")
 
-                elif self.previous_array[x][y] == "B":
-                    game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 96 + 50 * x, 96 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="#000", outline="#000")
-                    game_screen.create_oval(54 + 50 * x, 52 + 50 * y, 96 + 50 * x, 94 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="#111", outline="#111")
-                else:
-                    game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 96 + 50 * x, 96 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="red", outline="red")
-                    game_screen.create_oval(54 + 50 * x, 52 + 50 * y, 96 + 50 * x, 94 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="grey", outline="grey")
+                elif self.board_array[x][y] == "B":
+                    game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 96 + 50 * x, 96 + 50 * y, fill="#000",
+                                            outline="#000")
+                    game_screen.create_oval(54 + 50 * x, 52 + 50 * y, 96 + 50 * x, 94 + 50 * y, fill="#111",
+                                            outline="#111")
                 game_screen.create_line(50 * (x + 1), 50 * (y + 1), 50 * 9, 50 * (y + 1))
                 game_screen.create_line(50 * (x + 1), 50 * (y + 1), 50 * (x + 1), 50 * 9)
+                self.display_valid_moves(x, y)
         game_screen.create_line(50, 50 * 9, 50 * 9, 50 * 9)
         game_screen.create_line(50 * 9, 50, 50 * 9, 50 * 9)
+        count_pieces()
+        self.display_scoreboard()
+        if move_number % 2 == 0:
+            game_screen.create_oval(22, 265, 32, 275, fill="lime")
+            game_screen.create_oval(468, 265, 478, 275, fill="grey")
+        else:
+            game_screen.create_oval(468, 265, 478, 275, fill="lime")
+            game_screen.create_oval(22, 265, 32, 275, fill="grey")
 
-
-# CHANGE BETWEEN PREVIOUS ARRAY AND BOARD ARRAY FOR UNDO FUNCTIONALITY?
     def board_move(self, x, y):
-        self.board_array = move(self.board_array, x, y)
-        print(self.board_array[x][y], "MOVE #:", move_number)
         self.previous_array = self.board_array
+        self.board_array = move(self.board_array, x, y)
         self.display_board()
 
-    #def neighbor_flip(self, x, y):
+        # Prevents calling checkWin() three times
+        resultWin = checkWin()
+        if resultWin == 1:
+            game_screen.create_text(250, 470, text="WHITE WINS! Press 'R' to restart or 'Q' to quit.", fill="black",
+                                    font=20)
+        if resultWin == 2:
+            game_screen.create_text(250, 470, text="BLACK WINS! Press 'R' to restart or 'Q' to quit.", fill="black",
+                                    font=20)
+        if resultWin == 3:
+            game_screen.create_text(250, 470, text="DRAW! Press 'R' to restart or 'Q' to quit.", fill="black", font=20)
+
+    # Function to be used to display available moves
+    def display_valid_moves(self, x, y):
+        global move_number
+        if check_pass(self.board_array):
+            move_number += 1
+        validMoves = []
+        for i in range(8):
+            for j in range(8):
+                if is_valid_move(self.board_array, x, y):
+                    validMoves.append([x, y])
+                    game_screen.create_oval(70 + 50 * x, 70 + 50 * y, 80 + 50 * x, 80 + 50 * y, fill="blue",
+                                            outline="black")
+
+    def display_scoreboard(self):
+        game_screen.create_text(250, 25, text=f"White Wins - {white_wins} : {black_wins} - Black Wins", font=25)
+        game_screen.create_text(25, 250, text=f"W:{white_pieces}", font=20)
+        game_screen.create_text(475, 250, text=f"B:{black_pieces}", font=20)
 
 
-def update():
-    myBoard = Board()
-    myBoard.display_board()
-
-# TODO REMOVE COMMENTS: MAYBE REIMPLEMENT THE ADDING NEIGHBORS LIST TO ONLY ADD OPPOSITE COLORS???
 def is_valid_move(given_array, x, y):
-    print("test1")
     global move_number
     if move_number % 2 == 0:
         player_color = "W"
@@ -83,7 +111,6 @@ def is_valid_move(given_array, x, y):
         player_color = "B"
     # Checks for spots already taken
     if given_array[x][y] is not None:
-        print("INVALID: ALREADY HAVE PIECE")
         return False
     # Validity check for Othello rules: Flanking/neighbors
     else:
@@ -94,10 +121,7 @@ def is_valid_move(given_array, x, y):
                 if given_array[i][j] is not None:
                     has_neighbors = True
                     neighbors.append([i, j])
-                    print("HAS A NEIGHBOR")
-        print(neighbors)
         if not has_neighbors:
-            print("INVALID: NO NEIGHBORS")
             return False
         else:
             forms_line = False
@@ -111,41 +135,25 @@ def is_valid_move(given_array, x, y):
                     y_difference = yVal - y
                     holdX = xVal
                     holdY = yVal
-                    print("test2")
-                    print("XDIFF =", x_difference)
-                    print("YDIFF =", y_difference)
-                    print("HOLDX =", holdX)
-                    print("HOLDY =", holdY)
                     while (0 <= holdX <= 7) and (0 <= holdY <= 7):
                         if given_array[holdX][holdY] is None:
-                            print("BREAK ON EMPTY")
                             break
                         if given_array[holdX][holdY] == player_color:
-                            print("FORM LINE IS TRUE WOW")
                             forms_line = True
                             break
                         holdX = holdX + x_difference
                         holdY = holdY + y_difference
 
-            print("FORMS_LINE =", forms_line)
             return forms_line
 
 
-# Function to be used to display available moves TODO IMPLEMENT
-def get_valid_moves(given_array, x, y):
-    validMoves = []
-    for i in range(8):
-        for j in range(8):
-            if is_valid_move(given_array, x, y):
-                validMoves.append([x, y])
-                game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 66 + 50 * x, 66 + 50 * y, tags="tile {0}-{1}".format(x, y), fill="green", outline="#aaa")
-    return validMoves
-
-#TODO FLIPPING MECHANIC
 def move(given_array, x, y):
     global move_number
-    #new_array = deepcopy(given_array) TODO DEEPCOPY OR NO?
-    new_array = given_array
+    global white_pieces
+    global black_pieces
+    global undo_counter
+    undo_counter = 1
+    new_array = deepcopy(given_array)
     if move_number % 2 == 0:
         player_color = "W"
     else:
@@ -185,24 +193,113 @@ def move(given_array, x, y):
     return new_array
 
 
-# TODO implement validity checking
+# Function checks if a player needs to pass their turn. Used to check wins
+def check_pass(given_array):
+    global move_number
+    validMoves = []
+    for i in range(8):
+        for j in range(8):
+            if is_valid_move(given_array, i, j):
+                validMoves.append([i, j])
+    if len(validMoves) == 0:
+        return True
+    else:
+        return False
+
+
 def click(event):
     x = int((event.x - 50) / 50)
     y = int((event.y - 50) / 50)
     if 0 <= x <= 7 and 0 <= y <= 7:
         if is_valid_move(myBoard.board_array, x, y):
             myBoard.board_move(x, y)
-            print(x, y)
-        else:
-            print("INVALID MOVE")
 
+
+def count_pieces():
+    global white_pieces
+    global black_pieces
+    white_count = 0
+    black_count = 0
+
+    for i in range(8):
+        for j in range(8):
+            if myBoard.board_array[i][j] is None:
+                continue
+            elif myBoard.board_array[i][j] == "W":
+                white_count += 1
+            elif myBoard.board_array[i][j] == "B":
+                black_count += 1
+    white_pieces = white_count
+    black_pieces = black_count
+
+    return white_count, black_count
+
+
+def undo():
+    global move_number
+    global undo_counter
+    if undo_counter != 0:
+        move_number -= 1
+        myBoard.board_array = myBoard.previous_array
+        myBoard.display_board()
+        count_pieces()
+        undo_counter = 0
+
+
+def keyboard_buttons(event):
+    button_pressed = event.keysym
+    if button_pressed.lower() == "r":
+        playNewGame()
+    elif button_pressed.lower() == "q":
+        root.destroy()
+    elif button_pressed.lower() == "u":
+        undo()
+
+
+def playNewGame():
+    global move_number
+    global white_pieces
+    global black_pieces
+    move_number = 0
+    white_pieces = 2
+    black_pieces = 2
+    game_screen.delete("all")
+    myBoard.__init__()
+    myBoard.display_board()
+
+
+def checkWin():
+    global black_wins
+    global white_wins
+    global num_draws
+    global move_number
+
+    if check_pass(myBoard.board_array):
+        move_number += 1
+        if check_pass(myBoard.board_array):
+            num_pieces = count_pieces()
+
+            if num_pieces[0] > num_pieces[1]:
+                white_wins += 1
+                return 1
+            elif num_pieces[0] < num_pieces[1]:
+                black_wins += 1
+                return 2
+            elif black_pieces == white_pieces:
+                num_draws += 1
+                return 3
+    else:
+        return 0
 
 
 myBoard = Board()
+
 myBoard.display_board()
+checkWin()
+
 game_screen.bind("<Button-1>", click)
-# game_screen.bind("<Key>", key)
-game_screen.update()
+game_screen.bind("<Key>", keyboard_buttons)
+game_screen.focus_set()
 
-
+root.title("Othello")
 root.mainloop()
