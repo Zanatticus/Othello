@@ -1,0 +1,201 @@
+from copy import deepcopy
+
+
+move_number = 0
+white_pieces = 2
+black_pieces = 2
+white_wins = 0
+black_wins = 0
+num_draws = 0
+undo_counter = 0
+
+
+def is_valid_move(given_array, x, y):
+    global move_number
+    if move_number % 2 == 0:
+        player_color = "W"
+    else:
+        player_color = "B"
+    # Checks for spots already taken
+    if given_array[x][y] is not None:
+        return False
+    # Validity check for Othello rules: Flanking/neighbors
+    else:
+        has_neighbors = False
+        neighbors = []
+        for i in range(max(0, x - 1), min(x + 2, 8)):
+            for j in range(max(0, y - 1), min(y + 2, 8)):
+                if given_array[i][j] is not None:
+                    has_neighbors = True
+                    neighbors.append([i, j])
+        if not has_neighbors:
+            return False
+        else:
+            forms_line = False
+            for neighbor in neighbors:
+                xVal = neighbor[0]
+                yVal = neighbor[1]
+                if given_array[xVal][yVal] == player_color:
+                    continue
+                else:
+                    x_difference = xVal - x
+                    y_difference = yVal - y
+                    holdX = xVal
+                    holdY = yVal
+                    while (0 <= holdX <= 7) and (0 <= holdY <= 7):
+                        if given_array[holdX][holdY] is None:
+                            break
+                        if given_array[holdX][holdY] == player_color:
+                            forms_line = True
+                            break
+                        holdX = holdX + x_difference
+                        holdY = holdY + y_difference
+
+            return forms_line
+
+
+def who_moves():
+    global move_number
+    if move_number % 2 == 0:
+        return 0
+    else:
+        return 1
+
+
+def move(given_array, x, y):
+    global move_number
+    global white_pieces
+    global black_pieces
+    global undo_counter
+    undo_counter = 1
+    new_array = deepcopy(given_array)
+    if move_number % 2 == 0:
+        player_color = "W"
+    else:
+        player_color = "B"
+    new_array[x][y] = player_color
+    move_number += 1
+
+    opposite_neighbors = []
+    for i in range(max(0, x - 1), min(x + 2, 8)):
+        for j in range(max(0, y - 1), min(y + 2, 8)):
+            if given_array[i][j] is not None and given_array[i][j] != player_color:
+                opposite_neighbors.append([i, j])
+
+    for neighbor in opposite_neighbors:
+        xVal = neighbor[0]
+        yVal = neighbor[1]
+        x_difference = xVal - x
+        y_difference = yVal - y
+        holdX = xVal
+        holdY = yVal
+
+        line_elements = []
+
+        while 0 <= holdX <= 7 and 0 <= holdY <= 7:
+            line_color = given_array[holdX][holdY]
+            line_elements.append([holdX, holdY])
+            if line_color is None:
+                break
+            if line_color == player_color:
+                for piece in line_elements:
+                    new_array[piece[0]][piece[1]] = player_color
+                break
+            # Continue down the line
+            holdX = holdX + x_difference
+            holdY = holdY + y_difference
+
+    return new_array
+
+
+# Function checks if a player needs to pass their turn. Used to check wins
+def check_pass(given_array):
+    global move_number
+    validMoves = []
+    for i in range(8):
+        for j in range(8):
+            if is_valid_move(given_array, i, j):
+                validMoves.append([i, j])
+    if len(validMoves) == 0:
+        return True
+    else:
+        return False
+
+
+def display_valid_moves(given_array, x, y):
+    global move_number
+    if check_pass(given_array):
+        move_number += 1
+    validMoves = []
+    for i in range(8):
+        for j in range(8):
+            if is_valid_move(given_array, x, y):
+                validMoves.append([x, y])
+    return validMoves
+
+
+def count_pieces(given_array):
+    global white_pieces
+    global black_pieces
+    white_count = 0
+    black_count = 0
+
+    for i in range(8):
+        for j in range(8):
+            if given_array[i][j] is None:
+                continue
+            elif given_array[i][j] == "W":
+                white_count += 1
+            elif given_array[i][j] == "B":
+                black_count += 1
+    white_pieces = white_count
+    black_pieces = black_count
+
+    return white_count, black_count
+
+
+def undo():
+    global move_number
+    global undo_counter
+    if undo_counter != 0:
+        move_number -= 1
+
+        undo_counter = 0
+
+
+def play_new_game():
+    global move_number
+    global white_pieces
+    global black_pieces
+    move_number = 0
+    white_pieces = 2
+    black_pieces = 2
+
+
+def checkWin(given_array):
+    global black_wins
+    global white_wins
+    global num_draws
+    global move_number
+
+    if check_pass(given_array):
+        move_number += 1
+        if check_pass(given_array):
+            num_pieces = count_pieces(given_array)
+            if num_pieces[0] > num_pieces[1]:
+                white_wins += 1
+                return 1
+            elif num_pieces[0] < num_pieces[1]:
+                black_wins += 1
+                return 2
+            elif black_pieces == white_pieces:
+                num_draws += 1
+                return 3
+    else:
+        return 0
+
+
+def return_wins():
+    global white_wins
+    global black_wins
+    return white_wins, black_wins
