@@ -2,7 +2,9 @@ from logic import *
 
 
 class Board:
-
+    """
+    Board class handles all the displaying of the board to the screen and everything else associated with the board.
+    """
     def __init__(self, game_screen, root):
         """
         Initializes an 8x8 Othello board
@@ -26,6 +28,10 @@ class Board:
         self.previous_array = self.board_array
 
     def display_board(self):
+        """
+        Displays the board, scoreboard, whose move it is, etc.
+        :return: None
+        """
         self.game_screen.delete("all")
         for x in range(8):
             for y in range(8):
@@ -57,6 +63,12 @@ class Board:
             self.game_screen.create_oval(22, 265, 32, 275, fill="grey")
 
     def board_move(self, x, y):
+        """
+        Displays the result of logic.py's move function to the screen.
+        :param x:
+        :param y:
+        :return:
+        """
         self.previous_array = self.board_array
         self.board_array = move(self.board_array, x, y)
         self.display_board()
@@ -77,6 +89,12 @@ class Board:
 
     # Function to be used to display available moves
     def display_valid_moves(self, x, y):
+        """
+        Handles displaying all valid moves.
+        :param x: integer coordinate of self.board_values
+        :param y: integer coordinate of self.board_values
+        :return: None
+        """
         for valid_move in display_valid_moves(self.board_array, x, y):
             x = valid_move[0]
             y = valid_move[1]
@@ -84,15 +102,25 @@ class Board:
                                          outline="black")
 
     def display_scoreboard(self):
-        white_pieces = count_pieces(self.board_array)[0]
-        black_pieces = count_pieces(self.board_array)[1]
-        white_wins = return_wins()[0]
-        black_wins = return_wins()[1]
-        self.game_screen.create_text(250, 25, text=f"White Wins - {white_wins} : {black_wins} - Black Wins", font=25)
-        self.game_screen.create_text(25, 250, text=f"W:{white_pieces}", font=20)
-        self.game_screen.create_text(475, 250, text=f"B:{black_pieces}", font=20)
+        """
+        Handles displaying the scoreboard (wins) as well as the number of pieces currently on the board
+        for both players.
+        :return: None
+        """
+        wp = count_pieces(self.board_array)[0]
+        bp = count_pieces(self.board_array)[1]
+        ww = return_wins()[0]
+        bw = return_wins()[1]
+        self.game_screen.create_text(250, 25, text=f"White Wins - {ww} : {bw} - Black Wins", font=25)
+        self.game_screen.create_text(25, 250, text=f"W:{wp}", font=20)
+        self.game_screen.create_text(475, 250, text=f"B:{bp}", font=20)
 
     def click(self, event):
+        """
+        Handles mouse-click events on the board.
+        :param event: mouse-click
+        :return: None
+        """
         x = int((event.x - 50) / 50)
         y = int((event.y - 50) / 50)
         if 0 <= x <= 7 and 0 <= y <= 7:
@@ -100,12 +128,24 @@ class Board:
                 self.board_move(x, y)
 
     def undo(self):
+        """
+        Updates the display after undo-ing a move
+        :return: None
+        """
         undo()
         self.board_array = self.previous_array
         self.display_board()
         count_pieces(self.board_array)
 
     def keyboard_buttons(self, event):
+        """
+        Handles keyboard input to either:
+            a) restart
+            b) quit
+            c) undo
+        :param event: keyboard input
+        :return: None
+        """
         button_pressed = event.keysym
         if button_pressed.lower() == "r":
             self.play_new_game()
@@ -115,6 +155,10 @@ class Board:
             self.undo()
 
     def play_new_game(self):
+        """
+        Restarts the game.
+        :return: None
+        """
         play_new_game()
         self.game_screen.delete("all")
         self.__init__(self.game_screen, self.root)

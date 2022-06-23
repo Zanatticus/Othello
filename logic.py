@@ -11,6 +11,13 @@ undo_counter = 0
 
 
 def is_valid_move(given_array, x, y):
+    """
+    Returns True if the square selected is a valid move and False otherwise.
+    :param given_array: matrix
+    :param x: integer coordinate of given_array
+    :param y: integer coordinate of given_array
+    :return: boolean
+    """
     global move_number
     if move_number % 2 == 0:
         player_color = "W"
@@ -55,6 +62,10 @@ def is_valid_move(given_array, x, y):
 
 
 def who_moves():
+    """
+    Determines which player's (white/black) move it is
+    :return: integer
+    """
     global move_number
     if move_number % 2 == 0:
         return 0
@@ -63,6 +74,13 @@ def who_moves():
 
 
 def move(given_array, x, y):
+    """
+    Places a new piece based on whose turn it is and also flips opponents pieces.
+    :param given_array: matrix
+    :param x: integer coordinate of given_array
+    :param y: integer coordinate of given_array
+    :return: matrix
+    """
     global move_number
     global white_pieces
     global black_pieces
@@ -108,8 +126,12 @@ def move(given_array, x, y):
     return new_array
 
 
-# Function checks if a player needs to pass their turn. Used to check wins
 def check_pass(given_array):
+    """
+    Function checks whether a player needs to pass their turn. Also used to check wins.
+    :param given_array: matrix
+    :return: boolean
+    """
     global move_number
     validMoves = []
     for i in range(8):
@@ -123,6 +145,14 @@ def check_pass(given_array):
 
 
 def display_valid_moves(given_array, x, y):
+    """
+    Returns a list of lists containing x,y coordinates of all squares with valid placements. Used in board.py to
+    display these locations on the board.
+    :param given_array: matrix
+    :param x: integer coordinate of given_array
+    :param y: integer coordinate of given_array
+    :return: list
+    """
     global move_number
     if check_pass(given_array):
         move_number += 1
@@ -135,6 +165,11 @@ def display_valid_moves(given_array, x, y):
 
 
 def count_pieces(given_array):
+    """
+    Counts up all black and white pieces and returns them as a tuple.
+    :param given_array: matrix
+    :return: tuple
+    """
     global white_pieces
     global black_pieces
     white_count = 0
@@ -155,15 +190,22 @@ def count_pieces(given_array):
 
 
 def undo():
+    """
+    Handles the logic behind performing an undo. Only capable of doing one undo before moving again.
+    :return: None
+    """
     global move_number
     global undo_counter
     if undo_counter != 0:
         move_number -= 1
-
         undo_counter = 0
 
 
 def play_new_game():
+    """
+    Restarts global variables to their initial state.
+    :return:
+    """
     global move_number
     global white_pieces
     global black_pieces
@@ -173,6 +215,12 @@ def play_new_game():
 
 
 def checkWin(given_array):
+    """
+    Checks whether the game has ended based on if both players pass. Increments the number of wins or draws
+    depending on how many pieces are on the board.
+    :param given_array:
+    :return:
+    """
     global black_wins
     global white_wins
     global num_draws
@@ -196,6 +244,10 @@ def checkWin(given_array):
 
 
 def return_wins():
+    """
+    Returns a tuple containing the number of white wins and black wins, respectively.
+    :return: tuple
+    """
     global white_wins
     global black_wins
     return white_wins, black_wins
