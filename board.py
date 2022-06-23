@@ -37,24 +37,30 @@ class Board:
             for y in range(8):
                 self.row = x
                 self.column = y
+                # White piece display
                 if self.board_array[x][y] == "W":
                     self.game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 96 + 50 * x, 96 + 50 * y, fill="#aaa",
                                                  outline="#aaa")
                     self.game_screen.create_oval(54 + 50 * x, 52 + 50 * y, 96 + 50 * x, 94 + 50 * y, fill="#fff",
                                                  outline="#fff")
-
+                # Black piece display
                 elif self.board_array[x][y] == "B":
                     self.game_screen.create_oval(54 + 50 * x, 54 + 50 * y, 96 + 50 * x, 96 + 50 * y, fill="#000",
                                                  outline="#000")
                     self.game_screen.create_oval(54 + 50 * x, 52 + 50 * y, 96 + 50 * x, 94 + 50 * y, fill="#111",
                                                  outline="#111")
+                # Board checker board lines
                 self.game_screen.create_line(50 * (x + 1), 50 * (y + 1), 50 * 9, 50 * (y + 1))
                 self.game_screen.create_line(50 * (x + 1), 50 * (y + 1), 50 * (x + 1), 50 * 9)
+                # Blue circles for valid moves
                 self.display_valid_moves(x, y)
+        # Board boundaries
         self.game_screen.create_line(50, 50 * 9, 50 * 9, 50 * 9)
         self.game_screen.create_line(50 * 9, 50, 50 * 9, 50 * 9)
         count_pieces(self.board_array)
+        # Scoreboard and number of pieces
         self.display_scoreboard()
+        # Display of whose turn it is
         if not who_moves():
             self.game_screen.create_oval(22, 265, 32, 275, fill="lime")
             self.game_screen.create_oval(468, 265, 478, 275, fill="grey")
@@ -87,12 +93,11 @@ class Board:
             self.game_screen.create_text(250, 470, text="DRAW! Press 'R' to restart or 'Q' to quit.", fill="black",
                                          font=20)
 
-    # Function to be used to display available moves
     def display_valid_moves(self, x, y):
         """
         Handles displaying all valid moves.
-        :param x: integer coordinate of self.board_values
-        :param y: integer coordinate of self.board_values
+        :param x: integer coordinate of self.board_array
+        :param y: integer coordinate of self.board_array
         :return: None
         """
         for valid_move in display_valid_moves(self.board_array, x, y):

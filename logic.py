@@ -26,10 +26,11 @@ def is_valid_move(given_array, x, y):
     # Checks for spots already taken
     if given_array[x][y] is not None:
         return False
-    # Validity check for Othello rules: Flanking/neighbors
+    # Validity check for Othello rules: flanking/neighbors
     else:
         has_neighbors = False
         neighbors = []
+        # Finds all neighbors
         for i in range(max(0, x - 1), min(x + 2, 8)):
             for j in range(max(0, y - 1), min(y + 2, 8)):
                 if given_array[i][j] is not None:
@@ -38,6 +39,7 @@ def is_valid_move(given_array, x, y):
         if not has_neighbors:
             return False
         else:
+            # Creates a line stemming from the now found neighbors and determines if that is a valid line.
             forms_line = False
             for neighbor in neighbors:
                 xVal = neighbor[0]
@@ -95,6 +97,7 @@ def move(given_array, x, y):
     move_number += 1
 
     opposite_neighbors = []
+    # Finds all neighbors
     for i in range(max(0, x - 1), min(x + 2, 8)):
         for j in range(max(0, y - 1), min(y + 2, 8)):
             if given_array[i][j] is not None and given_array[i][j] != player_color:
@@ -113,13 +116,16 @@ def move(given_array, x, y):
         while 0 <= holdX <= 7 and 0 <= holdY <= 7:
             line_color = given_array[holdX][holdY]
             line_elements.append([holdX, holdY])
+            # Reached end of invalid line
             if line_color is None:
                 break
+            # Reached end of valid line
             if line_color == player_color:
                 for piece in line_elements:
+                    # Flips the opposite colored pieces
                     new_array[piece[0]][piece[1]] = player_color
                 break
-            # Continue down the line
+            # Continues down the line
             holdX = holdX + x_difference
             holdY = holdY + y_difference
 
@@ -166,7 +172,7 @@ def display_valid_moves(given_array, x, y):
 
 def count_pieces(given_array):
     """
-    Counts up all black and white pieces and returns them as a tuple.
+    Counts up all white and black pieces and returns them as a tuple, respectively.
     :param given_array: matrix
     :return: tuple
     """
@@ -226,8 +232,10 @@ def checkWin(given_array):
     global num_draws
     global move_number
 
+    # Checks for if the current player can't move
     if check_pass(given_array):
         move_number += 1
+        # Checks for if the other player can't move
         if check_pass(given_array):
             num_pieces = count_pieces(given_array)
             if num_pieces[0] > num_pieces[1]:
