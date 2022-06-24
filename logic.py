@@ -205,7 +205,7 @@ class Logic:
         self.white_pieces = 2
         self.black_pieces = 2
 
-    def checkWin(self, given_array):
+    def check_win(self, given_array):
         """
         Checks whether the game has ended based on if both players pass.
         Increments the number of wins or draws depending on how many
