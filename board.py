@@ -81,8 +81,8 @@ class Board:
         self.board_array = self.logistics.move(self.board_array, x, y)
         self.display_board()
 
-        # Prevents calling checkWin() three times
-        resultWin = self.logistics.checkWin(self.board_array)
+        # Prevents calling check_win() three times
+        resultWin = self.logistics.check_win(self.board_array)
         if resultWin == 1:
             self.game_screen.create_text(250, 470, text="WHITE WINS! Press 'R' to restart or 'Q' to quit.",
                                          fill="black",
